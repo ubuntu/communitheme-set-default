@@ -1,0 +1,41 @@
+#!/bin/sh
+set -e
+
+err() { echo "Error: $@" 1>&2; }
+
+if [ -z "$SUDO_UID" ]; then
+    err "you need to be root to run this script, please use sudo."
+    exit 2
+fi
+
+if [ "$1" != "" ] && [ "$1" != "remove" ]; then
+    err "expected that argument is either nothing (for installing) or 'remove'"
+    exit 2
+fi
+
+action="install"
+[ "$1" = "remove" ] && action="remove"
+
+set -u
+
+if [ -z `which dconf` ] || [ -z `which update-alternatives` ]; then
+    err "you need both dconf and update-alternatives to be installed your system"
+    exit 1
+fi
+
+keys="/org/gnome/desktop/interface/cursor-theme /org/gnome/desktop/interface/icon-theme /org/gnome/desktop/interface/gtk-theme"
+keys="$keys /org/gnome/desktop/sound/theme-name /org/gnome/desktop/sound/input-feedback-sounds"
+keys="$keys /org/gnome/mutter/center-new-windows"
+
+for k in $keys; do
+    dconf reset $k
+done
+
+if [ "$action" = "remove" ]; then
+    update-alternatives --remove gdm3.css /snap/communitheme/current/share/gnome-shell/theme/communitheme/gnome-shell.css 1>/dev/null
+    echo "Restored default for all user sessions and gdm interface theme. You need to reboot for this to take effect. Think about changing your new user session."
+else
+    update-alternatives --install /usr/share/gnome-shell/theme/gdm3.css gdm3.css /snap/communitheme/current/share/gnome-shell/theme/communitheme/gnome-shell.css 15 1>/dev/null
+    echo "Communitheme is now reset as default for its dedicated session and gdm interface. You need to reboot for this to take effect. Ensure you select the communitheme snap session."
+fi
+
