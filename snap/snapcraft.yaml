@@ -1,0 +1,25 @@
+name: communitheme-set-default
+version: '0.1'
+architectures: [all]
+summary: Helper tools to enable/disable communitheme settings
+description: |
+  This package goes alongside communitheme snap. The latter should be installed
+  and then "communitheme-set-default" can be ran to ensure that communitheme
+  is to as default in the corresponding snap session, and update the login
+  manager with that theme by default.
+  "communitheme-set-default remove" is the command to run to remove it.
+  Both needs to be ran as root.
+  .
+  More info on communitheme is available at
+  https://community.ubuntu.com/t/faq-ubuntu-new-theme/1930.
+grade: stable
+confinement: classic
+
+apps:
+  communitheme-set-default:
+    command: set-default
+
+parts:
+  tool:
+    source: .
+    plugin: dump
